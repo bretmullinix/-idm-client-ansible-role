@@ -1,0 +1,28 @@
+---
+
+- name: Install the Required Libraries
+  yum:
+    name: "{{ item.name }}"
+    state: present
+    use_backend: "{{ yum_backend }}"
+  with_items: "{{ yum_installs }}"
+
+- name:  Start and enable firewalld
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+
+- name: Open Ports for IDM
+  firewalld:
+    port: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  with_items: "{{ open_idm_ports }}"
+
+- name:  Change the Primary DNS Server for the IDM Client to be the IDM Server
+  include_tasks: "{{ role_path }}/tasks/main/change-dns-server-to-idm-server.yml"
+
+- name:  Make server an IDM Client
+  include_tasks: "{{ role_path }}/tasks/main/make-server-idm-client.yml"
