@@ -79,15 +79,66 @@ None.
 Example Playbook
 ----------------
 
-    - hosts: servers
-      var_files:
-        - vars/main.yml
-      roles:
-         - { role: bmullinix.idm-client }
+    ---
+    - name: Register server as IDM client
+      hosts: nexus_server
+      become: true
+      vars:
+        yum_installs:
+          - name: "python36"
+            install_name: "python36"
+          - name: "firewalld"
+            install_name: "firewalld"
+          - name: "nscd"
+            install_name: "nscd"
+          - name: "@idm:client"
+            install_name: "ipa-client"
+        yum_backend: dnf
+        idm_server_ip_address: 10.10.0.111
+        idm_domain_name: example2020.com
+        idm_fqdn: "idm.{{ idm_domain_name }}"
+        idm_client_hostname: "nexus"
+        idm_network_interface_name: "eth0"
+        idm_nmcli_interface_name: "System {{ idm_network_interface_name }}"
+        idm_admin_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          37616332303435313431313964343732336166366363613864303662653137303266353233383266
+          3032303064653162386634376464633264643332336263310a373330363466353036346438396331
+          65396363353063653166653237623535323738323232323934666434313934373137633234663230
+          6636323861323233650a313863393938643064323461626165646233386235326363356535346238
+          3762
+      tasks:
+    
+      - name: Register as IDM Client
+        import_role:
+          name: idm-client-ansible-role
 
 
-The **vars/main.yml** should contain the values you are using to override the **default/main.yml**
-role variables.  Look above for a description of those variables.
+
+The **vars** should contain the values you are using to override the **default/main.yml**
+role variables.  Look above for a description of those variables.  Remember to
+substitute your IDM Server **admin** password as an encrypted ansible vault
+string for the **idm_admin_password** variable.
+
+The playbook runs with a custom **ansible.cfg** with the following values set:
+
+```text
+inventory = inventory
+remote_user = centos
+private_key_file = ./my_keypair
+```
+
+The playbook **inventory** file contains the following:
+
+```text
+[all]
+nexus_server ansible_host=100.25.40.101
+```
+You will need to change the ip address to your target server ip address.
+
+The ansible playbook command was:  `ansible-playbook create_idm_client.yml --ask-vault-pass`
+
+The **create_idm_client.yml** contains the playbook example code above.
 
 License
 -------
