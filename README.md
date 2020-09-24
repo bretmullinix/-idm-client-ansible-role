@@ -109,9 +109,8 @@ Example Playbook
           3762
       tasks:
     
-      - name: Register as IDM Client
-        import_role:
-          name: idm-client-ansible-role
+      roles:
+        - idm-client-ansible-role
 
 
 
