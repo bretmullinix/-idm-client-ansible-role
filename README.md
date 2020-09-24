@@ -108,8 +108,8 @@ Example Playbook
           6636323861323233650a313863393938643064323461626165646233386235326363356535346238
           3762
 
-    roles:
-      - idm-client-ansible-role
+      roles:
+        - idm-client-ansible-role
 
 
 
